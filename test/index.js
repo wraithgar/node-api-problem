@@ -10,7 +10,7 @@ const ERR_TITLE = 'missing "title". a short, human-readable summary of the probl
 const STATUS_CODES_WEB = 'https://httpstatuses.com/'
 
 tap.test('API Problem', assert => {
-  assert.plan(18)
+  assert.plan(19)
 
   assert.ok(new Problem(404) instanceof Problem, 'Problem prototype')
 
@@ -40,15 +40,17 @@ tap.test('API Problem', assert => {
   assert.equal(new Problem(452, 'foo').status, '452', 'custom "status"')
   assert.equal(new Problem(404, 'foo', 'foo://bar/').type, 'foo://bar/', 'custom "type" ')
 
-  assert.deepEqual(new Problem(404, { foo: 'bar' }), { status: '404', title: STATUS_CODES[404], type: STATUS_CODES_WEB + 404, foo: 'bar' }, 'members immediatly after "status"')
-  assert.deepEqual(new Problem(404, 'foo', { foo: 'bar' }), { status: '404', title: 'foo', type: STATUS_CODES_WEB + 404, foo: 'bar' }, 'members immediatly after "title"')
-  assert.deepEqual(new Problem(404, 'foo', 'foo://bar/', { foo: 'bar' }), { status: '404', title: 'foo', type: 'foo://bar/', foo: 'bar' }, 'members immediatly after "type"')
+  assert.equal(new Problem(404, { foo: 'bar' }).foo, 'bar', 'members immediately after "status"')
+  assert.equal(new Problem(404, 'foo', { foo: 'bar' }).foo, 'bar', 'members immediately after "title"')
+  assert.equal(new Problem(404, 'foo', 'foo://bar/', { foo: 'bar' }).foo, 'bar', 'members immediately after "type"')
 
   Problem.BASE_URI = 'foo://bar/'
 
   assert.equal(new Problem(404, 'foo', 'baz', { instance: 'baz' }).instance, 'foo://bar/baz', '"instance" inherits "BASE_URI"')
 
   assert.equal(new Problem(404).toString(), `[404] Not Found (${STATUS_CODES_WEB}404)`, 'toString() yeilds is "[status] title (type)"')
+
+  assert.equal(new Problem(404, 'foo', 'bar').message, new Problem(404, 'foo', 'bar').toString(), 'with status, title, and type: error class message matches toString() output')
 })
 
 tap.test('HTTP Response', assert => {
